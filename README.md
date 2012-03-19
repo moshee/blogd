@@ -1,5 +1,6 @@
 # tumbl.rb
-#### a tumblr script
+
+a tumblr script
 
 ## Intended purpose
 

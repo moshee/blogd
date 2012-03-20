@@ -1,9 +1,10 @@
-# tumbl.rb
-#### a tumblr script
+# blogd
+
+a tumblr script
 
 ## Intended purpose
 
-To automate posting of images (animated GIFs, in particular) to Tumblr
+Automated blog poster. Primary target is uploading GIFs to Tumblr.
 
 ## Features to come
 

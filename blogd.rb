@@ -1,45 +1,51 @@
-require 'net/http'
+# encoding: utf-8
 require 'oauth'
-require 'oauth/consumer'
-require 'open-uri'
+require 'uri'
 require_relative './f'
 
+# have to patch OAuth so binary upload is possible
+module OAuth
+  module Helper
+    extend self
+    def escape(value)
+      URI::escape(value.to_s, OAuth::RESERVED_CHARACTERS)
+    rescue ArgumentError
+      # (changed Encoding::UTF_8 to Encoding::ASCII_8BIT)
+      URI::escape(value.to_s.force_encoding(Encoding::ASCII_8BIT), OAuth::RESERVED_CHARACTERS)
+    end
+  end
+end
 
-#files.each do |file|
-#  print "posting #{file.name}... "
-  consumer = OAuth::Consumer.new(
-    CONSUMER_KEY, SECRET_KEY,
-    :site               => "http://www.tumblr.com",
-    :request_token_path => "/oauth/request_token",
-    :authorize_path     => "/oauth/authorize",
-    :access_token_path  => "/oauth/access_token",
-    :http_method        => :post,
-    :scheme             => :header,
-  )
+raise RuntimeError, "Specify image files" if ARGV.length < 1
 
-  access_token = OAuth::AccessToken.from_hash consumer, :oauth_token => CONSUMER_KEY
-  print "got token, sending request... "
-  response = access_token.post(
-    "http://api.tumblr.com/v2/blog/animedgifs.tumblr.com/post",
-    "generator"    => "tumbl.rb",
-    "type"         => "text",
-    "body"         => "wtf oauth",
-    "private"      => "0",
-    "slug"         => "",
-    "state"        => "",
-    "tags"         => "wtf",
-  )
-=begin
-  response = access_token.post(
-    "http://api.tumblr.com/v2/blog/animedgifs.tumblr.com/post",
-    "type" => "photo",
-    "tags" => file.tags,
-    "data" => URI::encode(File.open(file.name).read.force_encoding('ASCII-8BIT')),
-  )
-=end
+filename = ARGV[0]
+tags = ARGV[1] || ""
 
-  puts response.body
+print "posting #{filename}... "
+consumer = OAuth::Consumer.new(
+  CONSUMER_KEY, SECRET_KEY,
+  :site               => "https://www.tumblr.com/",
+  :access_token_path  => "/oauth/access_token",
+  :http_method        => :post,
+)
 
-#  exit
-#end
+access_token = consumer.get_access_token(
+  nil, {},
+  :x_auth_mode => 'client_auth',
+  :x_auth_username => EMAIL,
+  :x_auth_password => PASSWORD,
+)
 
+print "got token, sending request... "
+response = access_token.post(
+  "http://api.tumblr.com/v2/blog/#{BLOG_URL}/post",
+  "generator" => "tumbl.rb",
+  "type"      => "photo",
+  "private"   => "0",
+  "slug"      => "",
+  "state"     => "",
+  "tags"      => tags,
+  "data"      => IO.binread(filename),
+)
+
+puts response.body

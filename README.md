@@ -10,10 +10,10 @@ Automated blog poster. Primary target is uploading GIFs to Tumblr.
 
 - daemon mode: monitor a directory for new images
 - other post types
-- not returning 401 errors
 
 ## What's missing here
 
-- `CONSUMER_KEY = "..."`: the consumer key given by Tumblr when you register a new app
-- `CONSUMER_SECRET = "..."`: the secret key
-- xAuth access
+- `CONSUMER_KEY`: the consumer key given by Tumblr when you register a new app
+- `CONSUMER_SECRET`: the secret key
+- `EMAIL`: tumblr login email
+- `PASSWORD`: tumblr password
